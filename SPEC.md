@@ -5,7 +5,7 @@
 
 ## Why this exists
 
-I'm applying to SAP's Global Technology Legal Compliance (GTLC) team. GTLC governs third-party IP in SAP's products (open-source licence compliance, software supply chain, AI governance) and builds in-house automation for it on Java (Spring or Grails) and Angular. This project is a small, real version of that work. It must be correct, tested, readable, and something I can explain line by line.
+Large software companies run legal compliance teams that govern third-party IP in their products (open-source licence compliance, software supply chain, AI governance), and they build in-house automation for it, often on Java (Spring) and Angular. This project is a small, real version of that work. It must be correct, tested, readable, and something I can explain line by line.
 
 ## What it does, in one sentence
 
