@@ -5,7 +5,9 @@ import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.dataformat.yaml.YAMLMapper;
 
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -30,6 +32,14 @@ public class LicensePolicy {
                       Map<String, PolicyStatus> exceptions) {
     }
 
+    // The policy as written, for display (GET /api/policy). Unmodifiable copies.
+    private final List<String> approved;
+    private final List<String> review;
+    private final List<String> denied;
+    private final Map<String, String> aliases;
+    private final Map<String, PolicyStatus> exceptions;
+
+    // Lookup tables, keyed by upper-cased text.
     private final Map<String, PolicyStatus> statusByKey = new HashMap<>();
     private final Map<String, String> canonicalByKey = new HashMap<>();
     private final Map<String, PolicyStatus> exceptionsByKey = new HashMap<>();
@@ -66,6 +76,13 @@ public class LicensePolicy {
                          List<String> denied,
                          Map<String, String> aliases,
                          Map<String, PolicyStatus> exceptions) {
+        this.approved = approved == null ? List.of() : List.copyOf(approved);
+        this.review = review == null ? List.of() : List.copyOf(review);
+        this.denied = denied == null ? List.of() : List.copyOf(denied);
+        // LinkedHashMap keeps the order of policy.yml; Map.copyOf would not.
+        this.aliases = aliases == null ? Map.of() : Collections.unmodifiableMap(new LinkedHashMap<>(aliases));
+        this.exceptions = exceptions == null ? Map.of() : Collections.unmodifiableMap(new LinkedHashMap<>(exceptions));
+
         addList(approved, PolicyStatus.APPROVED);
         addList(review, PolicyStatus.REVIEW);
         addList(denied, PolicyStatus.DENIED);
@@ -112,6 +129,26 @@ public class LicensePolicy {
     /** The verdict for a full "X WITH Y" expression, or empty if it isn't in the exceptions. */
     public Optional<PolicyStatus> exceptionStatus(String licenseWithException) {
         return Optional.ofNullable(exceptionsByKey.get(key(licenseWithException)));
+    }
+
+    public List<String> approved() {
+        return approved;
+    }
+
+    public List<String> review() {
+        return review;
+    }
+
+    public List<String> denied() {
+        return denied;
+    }
+
+    public Map<String, String> aliases() {
+        return aliases;
+    }
+
+    public Map<String, PolicyStatus> exceptions() {
+        return exceptions;
     }
 
     /** Case-insensitive, whitespace-tolerant map key. Locale.ROOT avoids the Turkish "i" problem. */

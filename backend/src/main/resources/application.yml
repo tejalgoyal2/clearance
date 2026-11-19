@@ -1,0 +1,33 @@
+spring:
+  application:
+    name: clearance
+
+  # Local defaults. Docker Compose overrides these with SPRING_DATASOURCE_* variables.
+  datasource:
+    url: jdbc:postgresql://localhost:5432/clearance
+    username: clearance
+    password: clearance
+
+  jpa:
+    # Flyway owns the schema; Hibernate only checks that the entities match it.
+    hibernate:
+      ddl-auto: validate
+    # Keep database access inside the service layer's transactions, not in the web layer.
+    open-in-view: false
+
+  servlet:
+    multipart:
+      max-file-size: 2MB
+      max-request-size: 3MB
+
+server:
+  tomcat:
+    # Let Tomcat read an oversized upload to the end so the client gets a clean 413
+    # instead of a reset connection.
+    max-swallow-size: 10MB
+
+clearance:
+  policy-file: classpath:policy.yml
+  deps-dev:
+    base-url: https://api.deps.dev
+    timeout: 5s
