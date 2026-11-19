@@ -40,7 +40,8 @@ services:
       backend:
         condition: service_healthy   # nginx only starts once the API is up
     healthcheck:
-      test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost/ || exit 1"]
+      # 127.0.0.1, not localhost: in Alpine "localhost" resolves to IPv6 first, where nginx isn't listening.
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1/ || exit 1"]
       interval: 10s
       timeout: 3s
       retries: 5
