@@ -7,7 +7,9 @@
 
 It's a small, real version of what a software supply-chain compliance team automates.
 
-![Scan detail page](docs/screenshot.png)
+![Scan detail page](docs/screenshots/scan-detail.png)
+
+More screenshots, plus the full build report (spec checklist, test counts, measured performance, what was cut), are in [docs/REPORT.md](docs/REPORT.md).
 
 > Not legal advice. Clearance flags licences for a human to review; it does not decide what is legal.
 
