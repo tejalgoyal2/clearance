@@ -1,0 +1,23 @@
+<header class="page-head">
+  <div>
+    <p class="kicker"><a routerLink="/">Scans</a> / <a [routerLink]="['/scans', scanId]">#{{ scanId }}</a> / Audit</p>
+    <h1>Audit trail</h1>
+    <p class="muted small">Append-only: entries can be added, never edited or removed.</p>
+  </div>
+</header>
+
+@if (error()) {
+  <p class="alert" role="alert">{{ error() }}</p>
+}
+
+@if (events(); as events) {
+  <ol class="timeline">
+    @for (event of events; track event.id) {
+      <li [class]="'timeline__item timeline__item--' + event.action.toLowerCase()">
+        <time class="mono small muted" [attr.datetime]="event.timestamp">{{ event.timestamp | date: 'd MMM y, HH:mm:ss' }}</time>
+        <p><span class="strong">{{ labels[event.action] }}</span> by <span class="mono">{{ event.actor }}</span></p>
+        <p class="muted">{{ event.detail }}</p>
+      </li>
+    }
+  </ol>
+}

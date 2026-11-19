@@ -1,0 +1,121 @@
+@if (error()) {
+  <p class="alert" role="alert">{{ error() }}</p>
+}
+
+@if (scan(); as scan) {
+  <header class="page-head">
+    <div>
+      <p class="kicker"><a routerLink="/">Scans</a> / {{ scan.ecosystem }} / #{{ scan.id }}</p>
+      <h1>{{ scan.projectName }}</h1>
+      <p class="muted mono small">{{ scan.componentCount }} components · scanned {{ scan.createdAt | date: 'd MMM y, HH:mm' }}</p>
+    </div>
+    <div class="page-head__actions">
+      <a class="button button--secondary" [routerLink]="['/scans', scan.id, 'audit']">Audit trail</a>
+      <a class="button button--secondary" [href]="reportUrl" download>Download CSV</a>
+    </div>
+  </header>
+
+  <section class="tiles" aria-label="Counts per verdict">
+    @for (status of statuses; track status) {
+      <div [class]="'tile tile--' + status.toLowerCase()">
+        <span class="tile__count">{{ scan.counts[status] }}</span>
+        <span class="tile__label">{{ label(status) }}</span>
+      </div>
+    }
+  </section>
+}
+
+<nav class="filters" aria-label="Filter by verdict">
+  <button type="button" class="filter" [class.filter--active]="filter() === null" (click)="setFilter(null)">All</button>
+  @for (status of statuses; track status) {
+    <button type="button" class="filter" [attr.data-filter]="status"
+            [class.filter--active]="filter() === status" (click)="setFilter(status)">
+      {{ label(status) }}
+    </button>
+  }
+</nav>
+
+@if (components(); as components) {
+  @if (components.length === 0) {
+    <p class="empty">No components with this verdict.</p>
+  } @else {
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Component</th>
+          <th>Licence as written</th>
+          <th>Verdict</th>
+          <th>Decision</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (c of components; track c.id) {
+          <tr>
+            <td>
+              <span class="strong">{{ c.name }}</span>
+              <span class="mono muted small block">{{ c.version ?? 'no version' }}</span>
+            </td>
+            <td>
+              <span class="mono">{{ c.rawLicense ?? '—' }}</span>
+              @if (c.spdxExpression && c.spdxExpression !== c.rawLicense) {
+                <span class="mono muted small block">→ {{ c.spdxExpression }}</span>
+              }
+              @if (c.policyNote) {
+                <span class="muted small block">{{ c.policyNote }}</span>
+              }
+            </td>
+            <td><app-status-chip [status]="c.policyStatus" /></td>
+            <td>
+              @if (c.decision !== 'NONE') {
+                <span class="strong">{{ c.decision === 'ACCEPTED' ? 'Accepted' : 'Rejected' }} by {{ c.decidedBy }}</span>
+                <span class="muted small block">“{{ c.decisionComment }}”</span>
+              } @else if (c.policyStatus !== 'APPROVED') {
+                <button type="button" class="button button--small button--secondary" [attr.data-review]="c.id"
+                        (click)="openReview(c)">Review</button>
+              } @else {
+                <span class="muted">—</span>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+}
+
+@if (reviewing(); as c) {
+  <div class="backdrop" (click)="closeReview()"></div>
+  <form class="dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-title" (submit)="saveDecision($event)">
+    <p class="kicker">Reviewer decision</p>
+    <h2 id="dialog-title">{{ c.name }} <span class="mono muted">{{ c.version }}</span></h2>
+    <p class="dialog__licence">
+      <span class="mono">{{ c.rawLicense ?? 'no licence found' }}</span>
+      <app-status-chip [status]="c.policyStatus" />
+    </p>
+    <p class="muted small">A decision records an exception with your name and reason. It never changes the policy verdict.</p>
+
+    <fieldset class="choice">
+      <legend class="field__label">Decision</legend>
+      <label><input type="radio" name="decision" value="ACCEPTED" (change)="choice.set('ACCEPTED')" /> Accept</label>
+      <label><input type="radio" name="decision" value="REJECTED" (change)="choice.set('REJECTED')" /> Reject</label>
+    </fieldset>
+
+    <label class="field">
+      <span class="field__label">Reviewer</span>
+      <input name="reviewer" type="text" maxlength="100" [value]="reviewer()" (input)="reviewer.set(inputValue($event))" />
+    </label>
+    <label class="field">
+      <span class="field__label">Comment (required)</span>
+      <textarea rows="3" maxlength="2000" [value]="comment()" (input)="comment.set(inputValue($event))"></textarea>
+    </label>
+
+    @if (dialogError()) {
+      <p class="alert" role="alert">{{ dialogError() }}</p>
+    }
+
+    <div class="dialog__actions">
+      <button type="button" class="button button--secondary" (click)="closeReview()">Cancel</button>
+      <button type="submit" class="button" [disabled]="!canSave()">{{ saving() ? 'Saving…' : 'Record decision' }}</button>
+    </div>
+  </form>
+}

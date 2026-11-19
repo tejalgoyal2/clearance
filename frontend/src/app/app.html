@@ -1,0 +1,19 @@
+<header class="masthead">
+  <div class="masthead__inner">
+    <a class="nameplate" routerLink="/">Clearance</a>
+    <p class="kicker masthead__tagline">Open-source licence compliance</p>
+    <nav class="nav">
+      <a routerLink="/" routerLinkActive="nav--active" [routerLinkActiveOptions]="{ exact: true }">Scans</a>
+      <a routerLink="/scans/new" routerLinkActive="nav--active">New scan</a>
+      <a routerLink="/policy" routerLinkActive="nav--active">Policy</a>
+    </nav>
+  </div>
+</header>
+
+<main class="page">
+  <router-outlet />
+</main>
+
+<footer class="footer">
+  <p class="kicker">Clearance · a demo, not legal advice</p>
+</footer>

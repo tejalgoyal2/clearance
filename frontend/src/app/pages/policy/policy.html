@@ -1,0 +1,62 @@
+<header class="page-head">
+  <div>
+    <p class="kicker">Read-only · loaded from policy.yml</p>
+    <h1>Licence policy</h1>
+  </div>
+</header>
+
+@if (error()) {
+  <p class="alert" role="alert">{{ error() }}</p>
+}
+
+@if (policy(); as policy) {
+  <section class="columns">
+    <div data-list="APPROVED">
+      <h2><app-status-chip status="APPROVED" /></h2>
+      <ul class="plain-list mono">@for (id of policy.approved; track id) { <li>{{ id }}</li> }</ul>
+    </div>
+    <div data-list="REVIEW">
+      <h2><app-status-chip status="REVIEW" /></h2>
+      <ul class="plain-list mono">@for (id of policy.review; track id) { <li>{{ id }}</li> }</ul>
+    </div>
+    <div data-list="DENIED">
+      <h2><app-status-chip status="DENIED" /></h2>
+      <ul class="plain-list mono">@for (id of policy.denied; track id) { <li>{{ id }}</li> }</ul>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>Rules, deny-first</h2>
+    <ol class="rules">
+      <li><code>A OR B</code> takes the less severe side: you may choose either licence.</li>
+      <li><code>A AND B</code> takes the more severe side: you must meet both.</li>
+      <li><code>X WITH Y</code> uses the exceptions below if listed, otherwise the verdict for X.</li>
+      <li>A licence the policy doesn't list, a missing licence or a malformed expression is <app-status-chip status="UNKNOWN" />.</li>
+      <li>A reviewer's decision never changes the verdict; it records an exception with who and why.</li>
+    </ol>
+  </section>
+
+  <section class="section">
+    <h2>Exceptions</h2>
+    <table class="table">
+      <thead><tr><th>Expression</th><th>Verdict</th></tr></thead>
+      <tbody>
+        @for (entry of policy.exceptions | keyvalue; track entry.key) {
+          <tr><td class="mono">{{ entry.key }}</td><td><app-status-chip [status]="entry.value" /></td></tr>
+        }
+      </tbody>
+    </table>
+  </section>
+
+  <section class="section">
+    <h2>Aliases</h2>
+    <table class="table">
+      <thead><tr><th>Found in the wild</th><th>SPDX id</th></tr></thead>
+      <tbody>
+        @for (entry of policy.aliases | keyvalue; track entry.key) {
+          <tr><td>{{ entry.key }}</td><td class="mono">{{ entry.value }}</td></tr>
+        }
+      </tbody>
+    </table>
+  </section>
+}

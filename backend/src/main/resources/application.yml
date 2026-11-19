@@ -31,3 +31,10 @@ clearance:
   deps-dev:
     base-url: https://api.deps.dev
     timeout: 5s
+
+# Only the health endpoint is exposed over HTTP.
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health

@@ -1,0 +1,36 @@
+<header class="page-head">
+  <div>
+    <p class="kicker"><a routerLink="/">Scans</a> / New</p>
+    <h1>New scan</h1>
+  </div>
+</header>
+
+<form class="form" (submit)="submit($event)">
+  <label class="field">
+    <span class="field__label">Project name</span>
+    <input name="projectName" type="text" maxlength="200" autocomplete="off"
+           placeholder="e.g. billing-service" [value]="projectName()" (input)="onNameInput($event)" />
+  </label>
+
+  <label class="dropzone" [class.dropzone--chosen]="file()">
+    <input type="file" accept=".xml,.json" (change)="onFileChange($event)" />
+    @if (file(); as chosen) {
+      <span class="dropzone__file mono">{{ chosen.name }}</span>
+      <span class="muted">Choose a different file</span>
+    } @else {
+      <span class="dropzone__title">Choose a dependency file</span>
+      <span class="muted"><code>pom.xml</code> or <code>package-lock.json</code>, up to 2 MB</span>
+    }
+  </label>
+
+  @if (error()) {
+    <p class="alert" role="alert">{{ error() }}</p>
+  }
+
+  <div class="form__actions">
+    <button class="button" type="submit" [disabled]="!canSubmit()">
+      {{ busy() ? 'Scanning… looking up licences' : 'Run scan' }}
+    </button>
+    <p class="muted small">Maven test-scope and npm dev dependencies are skipped: they don't ship.</p>
+  </div>
+</form>

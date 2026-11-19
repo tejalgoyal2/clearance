@@ -1,0 +1,58 @@
+<header class="page-head">
+  <div>
+    <p class="kicker">Register</p>
+    <h1>Scans</h1>
+  </div>
+  <a class="button" routerLink="/scans/new">New scan</a>
+</header>
+
+@if (error()) {
+  <p class="alert" role="alert">{{ error() }}</p>
+}
+
+@if (scans(); as scans) {
+  @if (scans.length === 0) {
+    <div class="empty">
+      <p class="empty__title">No scans yet</p>
+      <p>Upload a <code>pom.xml</code> or <code>package-lock.json</code> to check its licences.</p>
+    </div>
+  } @else {
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Project</th>
+          <th>Ecosystem</th>
+          <th>Scanned</th>
+          <th class="num">Components</th>
+          <th>Verdicts</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (scan of scans; track scan.id) {
+          <tr>
+            <td><a class="strong-link" [routerLink]="['/scans', scan.id]">{{ scan.projectName }}</a></td>
+            <td class="mono">{{ scan.ecosystem }}</td>
+            <td class="mono">{{ scan.createdAt | date: 'd MMM y, HH:mm' }}</td>
+            <td class="num mono">{{ scan.componentCount }}</td>
+            <td>
+              <div class="bar" aria-hidden="true">
+                @for (status of statuses; track status) {
+                  <span [class]="'bar__seg bar__seg--' + status.toLowerCase()" [style.flex-grow]="scan.counts[status]"></span>
+                }
+              </div>
+              <span class="breakdown">
+                @for (status of statuses; track status) {
+                  @if (scan.counts[status] > 0) {
+                    <span>{{ scan.counts[status] }} {{ status.toLowerCase() }}</span>
+                  }
+                }
+              </span>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+} @else if (!error()) {
+  <p class="muted">Loading scans…</p>
+}
